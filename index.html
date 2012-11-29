@@ -22,6 +22,22 @@ body { background-color: rgb(0,0,30); font-family: sans-serif; margin: 0; }
 	font-family: 'Montserrat Alternates', sans-serif;	
 	
 	}
+#tagText {
+	font-size: 22px;
+	height: 35px;
+	}
+
+#slice {
+	position: absolute; top: 0px; padding: 10px;
+	width: 100%;
+	text-align: center;
+	background: rgba(0,0,0,.2);
+	display: none;
+	}
+	#slice input, button {
+	font-size: 22px;
+	height: 35px;
+	}
 
 </style>
 
@@ -37,32 +53,43 @@ body { background-color: rgb(0,0,30); font-family: sans-serif; margin: 0; }
 		</div>
 		<div class="modal-body">  		
 			<form onsubmit="return saveTag();">
-				<input type="text" class="input-block-level" placeholder="#tag" id=tagText onkeyup="updateTag()">
+				<input type="text" class="input-block-level" style="" placeholder="#tag" id=tagText onkeyup="updateTag()">
 				<input type="text" class="input-block-level" placeholder="Google Drive document URL" id=GDDText onkeyup="updateGDD()">
 				<input type="submit" value="Submit" style="display:none;">
 			</form>
-			
 		</div>
 		<div class="modal-footer">
 			<div class=resetCookies>
 				<a href="#" class="btn btn-danger" onclick="resetCookies();" style="float: left">Reset Cookies</a>
 			</div>
 			<a href="#" class="btn" data-dismiss="modal">Cancel</a>
-			<a href="#" class="btn btn-primary" onclick="saveItems();" data-dismiss="modal">Save</a>
+			<a href="#" class="btn btn-primary" onclick="saveItems();">Save</a>
 		</div>
 	</div>
 </div>
 
+<div id="slice" class="input-append">
 
+<!-- 
+<div class="input-append">
+  <input class="span2" id="appendedInputButton sliceNumber" type="text">
+  <button class="btn" type="button">Go!</button>
+</div>
+ -->
+	<input type="text" class="span3" placeholder="how many?" id="appendedInputButton sliceNumber" onkeyup="updateSlice()">
+	<button class="btn btn-primary sliceSave" onclick="saveSliceNumber();" type="button">Save</button>
 </div>
 
 <script>
 
 var tempTag = "";
 var tempGDD = "";
+var tempSlice = "";
 var GDDCookie;
 var newTag = "";
 var randomItemHrefOld = "";
+var sliceNumber = -10;
+
 
 $(document).ready(function() {
 	setInterval(function() {
@@ -70,6 +97,11 @@ $(document).ready(function() {
     }, 20000);
 	cookie();
 	repositionItems();
+	
+	$('.image').click(function () {
+		$("#slice").slideToggle();
+		repositionSlice();
+	});
 }); 
 
 $(window).resize(function() {
@@ -82,14 +114,23 @@ function repositionItems() {
 	$(".instructions").css({"top":vo,"right":ho});
 }
 
+function repositionSlice () {
+// 	var ww = ($(window).width()/2);
+// 	var ew = $(".sliceSave").width()/2;
+// 	var l = ww - ew;
+// 	console.log(l);
+// 	$(".sliceSave").css({"left":l,"position":"absolute"});
+}
+
 function imageMagic (url) {
 	$.ajax({
 		url : url,
 		dataType: "html",
 		success : function (data) {
 			
-			var pic = $("a", data);      
-			var picTrim = pic.splice(-2);
+			var pic = $("a", data);
+			var pic = pic.slice(sliceNumber,-2);
+			console.log(pic);
 			var elemlength = pic.length;
 			var randomnum = Math.floor(Math.random()*elemlength);
 			var randomitem = pic[randomnum];
@@ -116,16 +157,37 @@ function updateTag () {
 function updateGDD () {
 	tempGDD = $('input#GDDText').val();
 }
+function updateSlice () {
+	tempSlice = $('input#sliceNumber').val();
+}
 
 function saveItems () {
-	saveTag = tempTag;
-	saveGDD = tempGDD;
-	$.cookie('ppTag', saveTag, { expires: 1 });
-	$.cookie('ppGDD', saveGDD, { expires: 1 });
-	$(".instructions").html("Instagram #" + saveTag);
-	$('#config').modal('hide');
-	repositionItems();
-	imageMagic();
+	if (!tempTag && !tempGDD) {
+		alert("Please enter a tag and Google Drive doc URL");
+	} else if (!tempTag && tempGDD) {
+		alert("Please enter a tag");
+	} else if (!tempGDD && tempTag) {
+		alert("Please enter a Google Drive doc URL");
+	} else {
+		saveTag = tempTag;
+		saveGDD = tempGDD;
+		console.log("tag - " + tempTag + "gdd - " + tempGDD); 
+		$.cookie('ppTag', saveTag, { expires: 1 });
+		$.cookie('ppGDD', saveGDD, { expires: 1 });
+		$.cookie('ppslice', sliceNumber, { expires: 1 });
+		$(".instructions").html("Instagram #" + saveTag);
+		$('#config').modal('hide');
+		repositionItems();
+		imageMagic();
+	}
+}
+
+function saveSliceNumber () {
+	if (tempSlice) {
+		sliceNumber = tempSlice;
+	} else {
+		sliceNumber = -10;
+	}
 }
 
 function cookie() {
