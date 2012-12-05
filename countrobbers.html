@@ -1,0 +1,26 @@
+<html>
+
+<body>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+<script>
+
+$(document).ready(function() {
+	var sev = 0;
+	for (var i = 100; i >= 0; i--) {
+		var d1 = (Math.floor(Math.random()*6))+1;
+		var d2 = (Math.floor(Math.random()*6))+1;
+		console.log((d1+d2));
+		if ((d1+d2) == 7) {
+			sev++;
+		}
+	};
+	console.log("#" + sev);
+}); 
+
+
+
+</script>
+
+</body>
+</html>
