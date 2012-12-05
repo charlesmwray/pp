@@ -54,7 +54,7 @@ body { background-color: rgb(0,0,30); font-family: sans-serif; margin: 0; }
 				<h4>How many to choose from?</h4>
 				<div class="btn-group" data-toggle="buttons-radio">
 				  <button type="button" class="btn" onclick="updateSlice(-5)">5</button>
-				  <button type="button" class="btn" onclick="updateSlice(-10)">10</button>
+				  <button type="button" class="btn active" onclick="updateSlice(-10)">10</button>
 				  <button type="button" class="btn" onclick="updateSlice(-20)">20</button>
 				</div>
 				<input type="submit" value="Submit" style="display:none;">
@@ -153,9 +153,9 @@ function saveItems () {
 		saveTag = tempTag;
 		saveGDD = tempGDD;
 		sliceNumber = tempSlice;
-		$.cookie('ppTag', saveTag, { expires: 1 });
-		$.cookie('ppGDD', saveGDD, { expires: 1 });
-		$.cookie('ppslice', sliceNumber, { expires: 1 });
+		$.cookie('ppTag', saveTag, { expires: 7 });
+		$.cookie('ppGDD', saveGDD, { expires: 7 });
+		$.cookie('ppslice', sliceNumber, { expires: 7 });
 		$(".instructions").html("Instagram #" + saveTag);
 		$('#config').modal('hide');
 		repositionItems();
@@ -184,6 +184,7 @@ function cookie() {
 function resetCookies() {
 	$.cookie('ppTag',null);
 	$.cookie('ppGDD',null);
+	location.reload();
 }
 
 function populateConfig() {
