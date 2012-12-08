@@ -22,12 +22,24 @@ body { background-color: rgb(0,0,30); font-family: sans-serif; margin: 0; }
 	font-family: 'Montserrat Alternates', sans-serif;	
 	
 	}
-
+#tagText {
+	font-size: 22px;
+	height: 35px;
+	}
+.setByCookie {
+	margin: 0 0 -5px 0;
+	padding: 5px 10px 10px 10px;
+	display: inline;
+	color: white;
+	text-align: left;
+	border-radius: 10px 10px 0 0;
+	background-color: rgba(0,0,200,.2);
+}
 </style>
 
 </head>
 <body>
-<div class=instructions data-toggle="modal" data-target="#config"></div>
+<div class=instructions data-toggle="modal" data-target="#config" onclick="populateConfig();"></div>
 <div class=image></div>
 <div class=fluid>
 	<div id=config class="modal hide fade span1">
@@ -37,8 +49,14 @@ body { background-color: rgb(0,0,30); font-family: sans-serif; margin: 0; }
 		</div>
 		<div class="modal-body">  		
 			<form onsubmit="return saveTag();">
-				<input type="text" class="input-block-level" placeholder="#tag" id=tagText onkeyup="updateTag()">
+				<input type="text" class="input-block-level" style="" placeholder="#tag" id=tagText onkeyup="updateTag()">
 				<input type="text" class="input-block-level" placeholder="Google Drive document URL" id=GDDText onkeyup="updateGDD()">
+				<h4>How many to choose from?</h4>
+				<div class="btn-group" data-toggle="buttons-radio">
+				  <button type="button" class="btn" onclick="updateSlice(-5)">5</button>
+				  <button type="button" class="btn active" onclick="updateSlice(-10)">10</button>
+				  <button type="button" class="btn" onclick="updateSlice(-20)">20</button>
+				</div>
 				<input type="submit" value="Submit" style="display:none;">
 			</form>
 			
@@ -48,21 +66,21 @@ body { background-color: rgb(0,0,30); font-family: sans-serif; margin: 0; }
 				<a href="#" class="btn btn-danger" onclick="resetCookies();" style="float: left">Reset Cookies</a>
 			</div>
 			<a href="#" class="btn" data-dismiss="modal">Cancel</a>
-			<a href="#" class="btn btn-primary" onclick="saveItems();" data-dismiss="modal">Save</a>
+			<a href="#" class="btn btn-primary" onclick="saveItems();">Save</a>
 		</div>
 	</div>
-</div>
-
-
 </div>
 
 <script>
 
 var tempTag = "";
 var tempGDD = "";
+var tempSlice = "";
 var GDDCookie;
 var newTag = "";
 var randomItemHrefOld = "";
+var sliceNumber = -10;
+
 
 $(document).ready(function() {
 	setInterval(function() {
@@ -88,8 +106,9 @@ function imageMagic (url) {
 		dataType: "html",
 		success : function (data) {
 			
-			var pic = $("a", data);      
-			var picTrim = pic.splice(-2);
+			var pic = $("a", data);
+			var pic = pic.slice(sliceNumber,-2);
+			console.log(pic);
 			var elemlength = pic.length;
 			var randomnum = Math.floor(Math.random()*elemlength);
 			var randomitem = pic[randomnum];
@@ -116,16 +135,32 @@ function updateTag () {
 function updateGDD () {
 	tempGDD = $('input#GDDText').val();
 }
+function updateSlice (num) {
+	tempSlice = num;
+	console.log(tempSlice);
+}
 
 function saveItems () {
-	saveTag = tempTag;
-	saveGDD = tempGDD;
-	$.cookie('ppTag', saveTag, { expires: 1 });
-	$.cookie('ppGDD', saveGDD, { expires: 1 });
-	$(".instructions").html("Instagram #" + saveTag);
-	$('#config').modal('hide');
-	repositionItems();
-	imageMagic();
+	updateTag();
+	updateGDD();
+	if (!tempTag && !tempGDD) {
+		alert("Please enter a tag and Google Drive doc URL");
+	} else if (!tempTag && tempGDD) {
+		alert("Please enter a tag");
+	} else if (!tempGDD && tempTag) {
+		alert("Please enter a Google Drive doc URL");
+	} else {
+		saveTag = tempTag;
+		saveGDD = tempGDD;
+		sliceNumber = tempSlice;
+		$.cookie('ppTag', saveTag, { expires: 7 });
+		$.cookie('ppGDD', saveGDD, { expires: 7 });
+		$.cookie('ppslice', sliceNumber, { expires: 7 });
+		$(".instructions").html("Instagram #" + saveTag);
+		$('#config').modal('hide');
+		repositionItems();
+		imageMagic();
+	}
 }
 
 function cookie() {
@@ -149,6 +184,21 @@ function cookie() {
 function resetCookies() {
 	$.cookie('ppTag',null);
 	$.cookie('ppGDD',null);
+	location.reload();
+}
+
+function populateConfig() {
+	var tagCookie = $.cookie('ppTag');
+	var GDDCookie = $.cookie('ppGDD');
+	if (tagCookie) {
+		$("#tagText").attr("value",tagCookie);
+		$("#tagText").before("<p class=setByCookie>Set by cookie.</p>");
+	}
+	if (GDDCookie) {
+		$("#GDDText").attr("value",GDDCookie);
+		$("#GDDText").before("<p class=setByCookie>Set by cookie.</p>");
+	};
+	$(".setByCookie").fadeOut();
 }
 
 </script>
